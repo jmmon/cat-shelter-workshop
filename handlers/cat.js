@@ -18,7 +18,9 @@ module.exports = (req, res) => {
         const index = fs.createReadStream(filepath);
 
         index.on('data', (data) => {
-            res.write(data);
+            let catBreedPlaceholder = breeds.map((breed) => `<option value="${breed}">${breed}</option>`);
+            let modifiedData = data.toString().replace('{{catBreeds}}', catBreedPlaceholder)
+            res.write(modifiedData);
         });
 
         index.on('end', () => {
@@ -73,13 +75,38 @@ module.exports = (req, res) => {
 
             });
 
-            res.writeHead(202, {
-                Location: '/'
-            });   //redirect NOT WORKING
+            res.writeHead(302, {
+                location: '/'
+            });
             res.end();
         });
 
     } else if (pathname === '/cats/add-cat' && req.method === 'POST') {
+
+        let form = new formidable.IncomingForm();
+
+        form.parse(req, (err, fields, files) => {
+            if (err) throw err;
+
+            let oldPath = files.upload.path;
+            let newPath = path.normalize(path.join(globalPath,"/content/images" + files.upload.name));
+
+            fs.rename(oldPath, newPath, (err) => {
+                if (err) throw err;
+                console.log('files was uploaded successfully');
+            });
+
+            fs.readFile('./data/cats.json', 'utf8', (err, data) => {
+
+                let allCats = JSON.parse(data);
+                allCats.push({ id:CacheStorage.length = 1, ...fields, image: files.upload.name });
+                let json = JSON.stringify(allCats);
+                fs.writeFile('./data/cats.json', json, () => {
+                    res.writeHead(302, {location: "/"});
+                    res.end();
+                })
+            })
+        });
 
     } else {
         return true; //is request not handled
