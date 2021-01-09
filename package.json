@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/jmmon/cat-shelter-workshop/issues"
   },
-  "homepage": "https://github.com/jmmon/cat-shelter-workshop#readme"
+  "homepage": "https://github.com/jmmon/cat-shelter-workshop#readme",
+  "dependencies": {
+    "formidable": "^1.2.2"
+  }
 }
