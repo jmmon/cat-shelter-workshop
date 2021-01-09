@@ -1,12 +1,17 @@
+const url = require('url');
+const fs = require('fs');
+
 function getContentType(url) {
     if (url.endsWith('css')){
         return 'text/css';
     } else if(url.endsWith('http')) {
         return 'text/http';
     } else if(url.endsWith('png')) {
-        return 'png';
+        return 'image/png';
     } else if(url.endsWith('js')) {
-        return 'js';
+        return 'text/javascript';
+    } else if(url.endsWith('ico')) {
+        return 'image/ico';
     }
 }
 
@@ -20,7 +25,7 @@ module.exports = (req,res) => {
         //deliver correct content type
         //send correct response with data received from the fs module
 
-        fs.readFile(`./${filepath}`, 'utf-8', (err,data) => {
+        fs.readFile(`./${pathname}`, 'utf-8', (err,data) => {
             if (err) {
                 console.log(err);
                 res.writeHead(404, {
@@ -43,4 +48,4 @@ module.exports = (req,res) => {
     } else {
         return true;
     }
-}
+};
