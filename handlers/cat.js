@@ -89,12 +89,14 @@ module.exports = (req, res) => {
         form.parse(req, (err, fields, files) => {
             if (err) throw err;
             console.log('fields:', fields);
-
             let globalPath = 'C:\\Users\\jmmon\\Documents\\Visual Studio 2019\\Kingsland University\\PI5\\Topic 01\\cat-shelter-workshop';
             let oldPath = files.upload.path;    //
-            let newPath = path.normalize(path.join(globalPath, "/content/images/" + files.upload.name));
+            let newPath = path.normalize(path.join(__dirname, "../content/images/" + files.upload.name));
             console.log('old path:', oldPath);
             console.log('new path:', newPath);
+            console.log('typeof:', typeof oldPath);
+            let newId = oldPath.match(/[\A-Za-z0-9]+$/g)[0];
+            console.log('id:', newId);
             fs.rename(oldPath, newPath, (err) => {
                 if (err) throw err;
                 console.log('files was uploaded successfully');
@@ -105,7 +107,7 @@ module.exports = (req, res) => {
 
                 let allCats = JSON.parse(data);
                 //allCats.push({ id:CacheStorage.length = 1, ...fields, image: files.upload.name });        //ID not working
-                allCats.push({ id:1, ...fields, image: files.upload.name });
+                allCats.push({ id:newId, ...fields, image: files.upload.name });
                 let json = JSON.stringify(allCats);
                 fs.writeFile('./data/cats.json',json, (err) => {
                     if (err) throw err;
