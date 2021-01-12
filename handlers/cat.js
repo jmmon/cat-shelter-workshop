@@ -117,6 +117,59 @@ module.exports = (req, res) => {
             })
         });
 
+    } else if (pathname.includes('/cats-edit') && req.method === 'GET') {
+        console.log('get cats-edit');
+        let filepath = path.normalize(
+            path.join(__dirname, "../views/editCat.html")
+        );
+
+        const index = fs.createReadStream(filepath);
+
+        index.on('data', (data) => {
+            //console.log('req', req, '\nres', res);
+            
+            let newId = req.url.match(/[\A-Za-z0-9]+$/g)[0];    //get id from url
+            console.log('new id',newId);
+
+            let currentCat;
+            for (let i=0; i<cats.length; i++) {     //search cats arr and find the cat with the id
+                if (cats[i].id === newId) {
+                    currentCat = cats[i];
+                    break;
+                }
+            }
+
+            let modifiedData = data.toString().replace('{{id}}', currentCat.id);
+            modifiedData = modifiedData.replace('{{name}}', currentCat.name);
+            modifiedData = modifiedData.replace('{{description}}', currentCat.description);
+
+            const breedsAsOptions = breeds.map((b) => `<option value="${b}">${b}</option>`);
+            modifiedData = modifiedData.replace('{{catBreeds}}', breedsAsOptions.join('/'));
+
+            modifiedData = modifiedData.replace('{{breed}}', currentCat.breed);
+
+            // let catBreedPlaceholder = breeds.map((breed) => `<option value="${breed}">${breed}</option>`);
+            // let modifiedData = data.toString().replace('{{catBreeds}}', catBreedPlaceholder)
+            res.write(modifiedData);
+        });
+
+        index.on('end', () => {
+            res.end();
+        });
+
+        index.on('error', (err) => {
+            console.log(err);
+        });
+
+    } else if (pathname.includes('/cats-find-new-home') && req.method === 'GET') {
+        console.log('get cats-find-new-home');
+
+    } else if (pathname.includes('/cats-edit') && req.method === 'POST') {
+        console.log('post cats-edit');
+
+    } else if (pathname.includes('/cats-find-new-home') && req.method === 'POST') {
+        console.log('post cats-find-new-home');
+
     } else {
         return true; //is request not handled
     }
