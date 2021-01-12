@@ -49,6 +49,7 @@ module.exports = (req, res) => {
         index.on('error', (err) => {
             console.log(err);
         });
+
     } else if (pathname === '/cats/add-breed' && req.method === 'POST') {
         console.log('add-breed post path');
         let formData = '';
@@ -82,26 +83,32 @@ module.exports = (req, res) => {
         });
 
     } else if (pathname === '/cats/add-cat' && req.method === 'POST') {
-
+        console.log('add cat post');
         let form = new formidable.IncomingForm();
 
         form.parse(req, (err, fields, files) => {
             if (err) throw err;
+            console.log('fields:', fields);
 
-            let oldPath = files.upload.path;
-            let newPath = path.normalize(path.join(globalPath,"/content/images" + files.upload.name));
-
+            let globalPath = 'C:\\Users\\jmmon\\Documents\\Visual Studio 2019\\Kingsland University\\PI5\\Topic 01\\cat-shelter-workshop';
+            let oldPath = files.upload.path;    //
+            let newPath = path.normalize(path.join(globalPath, "/content/images/" + files.upload.name));
+            console.log('old path:', oldPath);
+            console.log('new path:', newPath);
             fs.rename(oldPath, newPath, (err) => {
                 if (err) throw err;
                 console.log('files was uploaded successfully');
             });
 
-            fs.readFile('./data/cats.json', 'utf8', (err, data) => {
+            fs.readFile('./data/cats.json', 'utf-8', (err, data) => {
+                if (err) throw err;
 
                 let allCats = JSON.parse(data);
-                allCats.push({ id:CacheStorage.length = 1, ...fields, image: files.upload.name });
+                //allCats.push({ id:CacheStorage.length = 1, ...fields, image: files.upload.name });        //ID not working
+                allCats.push({ id:1, ...fields, image: files.upload.name });
                 let json = JSON.stringify(allCats);
-                fs.writeFile('./data/cats.json', json, () => {
+                fs.writeFile('./data/cats.json',json, (err) => {
+                    if (err) throw err;
                     res.writeHead(302, {location: "/"});
                     res.end();
                 })
