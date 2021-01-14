@@ -185,64 +185,60 @@ module.exports = (req, res) => {
                 // [{"id":"e885c49f78e25e268ee0d16eaccca1ff","name":"1","description":"1","breed":"Unknown Breed","image":"cat-jan-11th.png"},{"id":"f90a1118c17317b17d014a78ed0e9217","name":"2","description":"2","breed":"Unknown Breed2","image":"cat-jan-11th.png"},{"id":"373f6a58fca44701f357590cef8d8e56","name":"3","description":"3","breed":"Unknown Breed3","image":"cat-jan-11th.png"}]
                 console.log('all cats:', allCats);
                 console.log('old data:', thisCat);
-                let tempObj = {};
+                let editedCat = {};
                 let keys = Object.keys(fields);
                 console.log('fields-keys:', keys);
-                tempObj.id = id;
-                //tempObj.name = (thisCat.name !== fields.name && fields.name !== undefined) ? 
-                for (let i = 0; i < keys.length; i++) {       //skip last key (image key), do that separate
+
+                editedCat.id = id;    //id wasn't included in form so add it here
+                for (let i = 0; i < keys.length; i++) { //add keys from fields (file is excluded, we add file next)
                     if (thisCat[keys[i]] !== fields[keys[i]]) {
                         if (fields[keys[i]] !== undefined) {
-                            tempObj[keys[i]] = fields[keys[i]];
+                            editedCat[keys[i]] = fields[keys[i]];
                             console.log('~~~ updated', keys[i]);
 
                         }
                     } else {
-                        tempObj[keys[i]] = thisCat[keys[i]];
+                        editedCat[keys[i]] = thisCat[keys[i]];
                         console.log('~~~ carryover', keys[i]);
 
                     }
                 }
 
-                let handleImage = new Promise(resolve => {
-                    if (files.upload.name === '') { //if no file uploaded
-                        tempObj.image = thisCat.image;      //copy over last image to new image
-                    } else {
-                        if (thisCat.image !== files.upload.name) {  //if file is uploaded and name is different
-                            //process new file
-        
-                            let oldPath = files.upload.path;    //
-                            let newPath = path.normalize(path.join(__dirname, "../content/images/" + files.upload.name));
-                            console.log('old path:', oldPath);
-                            console.log('new path:', newPath);
-                            // console.log('typeof:', typeof oldPath);
-        
-                            fs.rename(oldPath, newPath, (err) => {
-                                if (err) throw err;
-                                console.log('files was uploaded successfully');
-                            });
-        
-                        } else {
-                            tempObj.image = thisCat.image;      //copy over last image to new image
-                        }
-                    }
-                    resolve(tempObj);
-                })
-                    
                 
-                handleImage.then((obj) => {
-                    console.log('updated cat info:', obj);
+                if (files.upload.name === '' || thisCat.image === files.upload.name) {
+                    editedCat.image = thisCat.image;      //copy over last image to new image
 
-                    allCats[thisCatIndex]= obj; //overwrite last cat object with new edited cat object
-                    let json = JSON.stringify(allCats);
-                    fs.writeFile('./data/cats.json',json, (err) => {
+                } else {
+                    //process new file
+                    editedCat.image = files.upload.name;
+
+                    let oldPath = files.upload.path;
+                    let newPath = path.normalize(path.join(__dirname, "../content/images/" + files.upload.name));
+                    console.log('old path:', oldPath);
+                    console.log('new path:', newPath);
+                    // console.log('typeof:', typeof oldPath);
+
+                    fs.rename(oldPath, newPath, (err) => {
                         if (err) throw err;
-                        res.writeHead(302, {location: "/"});
-                        res.end();
-                    })
+                        console.log('files was uploaded successfully');
+                    });
+                    
+                }
+                
+
+                //write file with new data
+
+                console.log('updated cat info:', editedCat);
+
+                allCats[thisCatIndex]= editedCat; //overwrite last cat object with new edited cat object
+                let json = JSON.stringify(allCats);
+                fs.writeFile('./data/cats.json',json, (err) => {
+                    if (err) throw err;
+                    //res.writeHead(302, {location: "/"});
+                    res.redirect(302, '/')
+                    res.end();
                 })
-                
-                
+
             })
         });
 
