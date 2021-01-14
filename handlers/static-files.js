@@ -12,6 +12,10 @@ function getContentType(url) {
         return 'text/javascript';
     } else if(url.endsWith('ico')) {
         return 'image/ico';
+    } else if(url.endsWith('jpg')) {
+        return 'image/jpg';
+    } else if(url.endsWith('jpeg')) {
+        return 'image/jpeg';
     }
 }
 

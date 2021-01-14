@@ -31,6 +31,42 @@ module.exports = (req, res) => {
             console.log(err);
         });
 
+    } else if (pathname === '/cats/add-cat' && req.method === 'POST') {
+        console.log('add cat post');
+        let form = new formidable.IncomingForm();
+
+        form.parse(req, (err, fields, files) => {
+            if (err) throw err;
+            console.log('~fields:', fields);
+            console.log('~files:', files);
+
+            let oldPath = files.upload.path;    //
+            let newPath = path.normalize(path.join(__dirname, "../content/images/" + files.upload.name));
+            console.log('old path:', oldPath);
+            console.log('new path:', newPath);
+            console.log('typeof:', typeof oldPath);
+            let newId = oldPath.match(/[\A-Za-z0-9]+$/g)[0];
+            console.log('id:', newId);
+            fs.rename(oldPath, newPath, (err) => {
+                if (err) throw err;
+                console.log('files was uploaded successfully');
+            });
+
+            fs.readFile('./data/cats.json', 'utf-8', (err, data) => {
+                if (err) throw err;
+
+                let allCats = JSON.parse(data);
+                //allCats.push({ id:CacheStorage.length = 1, ...fields, image: files.upload.name });        //ID not working
+                allCats.push({ id:newId, ...fields, image: files.upload.name });
+                let json = JSON.stringify(allCats);
+                fs.writeFile('./data/cats.json',json, (err) => {
+                    if (err) throw err;
+                    res.writeHead(302, {location: "/"});
+                    res.end();
+                })
+            })
+        });
+
     } else if (pathname === '/cats/add-breed' && req.method === 'GET') {
         let filepath = path.normalize(
             path.join(__dirname, "../views/addBreed.html")
@@ -82,41 +118,6 @@ module.exports = (req, res) => {
             res.end();
         });
 
-    } else if (pathname === '/cats/add-cat' && req.method === 'POST') {
-        console.log('add cat post');
-        let form = new formidable.IncomingForm();
-
-        form.parse(req, (err, fields, files) => {
-            if (err) throw err;
-            console.log('fields:', fields);
-            let globalPath = 'C:\\Users\\jmmon\\Documents\\Visual Studio 2019\\Kingsland University\\PI5\\Topic 01\\cat-shelter-workshop';
-            let oldPath = files.upload.path;    //
-            let newPath = path.normalize(path.join(__dirname, "../content/images/" + files.upload.name));
-            console.log('old path:', oldPath);
-            console.log('new path:', newPath);
-            console.log('typeof:', typeof oldPath);
-            let newId = oldPath.match(/[\A-Za-z0-9]+$/g)[0];
-            console.log('id:', newId);
-            fs.rename(oldPath, newPath, (err) => {
-                if (err) throw err;
-                console.log('files was uploaded successfully');
-            });
-
-            fs.readFile('./data/cats.json', 'utf-8', (err, data) => {
-                if (err) throw err;
-
-                let allCats = JSON.parse(data);
-                //allCats.push({ id:CacheStorage.length = 1, ...fields, image: files.upload.name });        //ID not working
-                allCats.push({ id:newId, ...fields, image: files.upload.name });
-                let json = JSON.stringify(allCats);
-                fs.writeFile('./data/cats.json',json, (err) => {
-                    if (err) throw err;
-                    res.writeHead(302, {location: "/"});
-                    res.end();
-                })
-            })
-        });
-
     } else if (pathname.includes('/cats-edit') && req.method === 'GET') {
         console.log('get cats-edit');
         let filepath = path.normalize(
@@ -131,25 +132,16 @@ module.exports = (req, res) => {
             let newId = req.url.match(/[\A-Za-z0-9]+$/g)[0];    //get id from url
             console.log('new id',newId);
 
-            let currentCat;
-            for (let i=0; i<cats.length; i++) {     //search cats arr and find the cat with the id
-                if (cats[i].id === newId) {
-                    currentCat = cats[i];
-                    break;
-                }
-            }
+            let currentCat = search(cats, newId);
 
-            let modifiedData = data.toString().replace('{{id}}', currentCat.id);
+            let modifiedData = data.toString().replace('{{catId}}', newId);
             modifiedData = modifiedData.replace('{{name}}', currentCat.name);
             modifiedData = modifiedData.replace('{{description}}', currentCat.description);
 
             const breedsAsOptions = breeds.map((b) => `<option value="${b}">${b}</option>`);
             modifiedData = modifiedData.replace('{{catBreeds}}', breedsAsOptions.join('/'));
 
-            modifiedData = modifiedData.replace('{{breed}}', currentCat.breed);
-
-            // let catBreedPlaceholder = breeds.map((breed) => `<option value="${breed}">${breed}</option>`);
-            // let modifiedData = data.toString().replace('{{catBreeds}}', catBreedPlaceholder)
+            modifiedData = modifiedData.replace(`<option value="${currentCat.breed}">`, `<option value="${currentCat.breed}" selected>`);   //select breed
             res.write(modifiedData);
         });
 
@@ -161,16 +153,146 @@ module.exports = (req, res) => {
             console.log(err);
         });
 
+
+
+    } else if (pathname.includes('/cats-edit/') && req.method === 'POST') {
+        let id = pathname.match(/[\A-Za-z0-9]+$/g)[0];
+        console.log('post cats-edit');
+        //console.log('~req:', req);
+        let form = new formidable.IncomingForm();
+        //console.log('~form:', form);
+
+        form.parse(req, (err, fields, files) => {
+            if (err) throw err;
+            console.log('~fields:', fields);
+            console.log('~files:', files);
+
+            fs.readFile('./data/cats.json', 'utf-8', (err, data) => {
+                if (err) throw err;
+
+                let allCats = JSON.parse(data); //get arr of objects
+
+                let thisCat;
+                let thisCatIndex;
+                
+                for (let i = 0; i < allCats.length; i++) {      //get this cat by matching ID
+                    if (allCats[i].id === id) {
+                        thisCat = allCats[i];
+                        thisCatIndex = i;
+                    }
+                }
+
+                // [{"id":"e885c49f78e25e268ee0d16eaccca1ff","name":"1","description":"1","breed":"Unknown Breed","image":"cat-jan-11th.png"},{"id":"f90a1118c17317b17d014a78ed0e9217","name":"2","description":"2","breed":"Unknown Breed2","image":"cat-jan-11th.png"},{"id":"373f6a58fca44701f357590cef8d8e56","name":"3","description":"3","breed":"Unknown Breed3","image":"cat-jan-11th.png"}]
+                console.log('all cats:', allCats);
+                console.log('old data:', thisCat);
+                let tempObj = {};
+                let keys = Object.keys(fields);
+                console.log('fields-keys:', keys);
+                tempObj.id = id;
+                //tempObj.name = (thisCat.name !== fields.name && fields.name !== undefined) ? 
+                for (let i = 0; i < keys.length; i++) {       //skip last key (image key), do that separate
+                    if (thisCat[keys[i]] !== fields[keys[i]]) {
+                        if (fields[keys[i]] !== undefined) {
+                            tempObj[keys[i]] = fields[keys[i]];
+                            console.log('~~~ updated', keys[i]);
+
+                        }
+                    } else {
+                        tempObj[keys[i]] = thisCat[keys[i]];
+                        console.log('~~~ carryover', keys[i]);
+
+                    }
+                }
+
+                let handleImage = new Promise(resolve => {
+                    if (files.upload.name === '') { //if no file uploaded
+                        tempObj.image = thisCat.image;      //copy over last image to new image
+                    } else {
+                        if (thisCat.image !== files.upload.name) {  //if file is uploaded and name is different
+                            //process new file
+        
+                            let oldPath = files.upload.path;    //
+                            let newPath = path.normalize(path.join(__dirname, "../content/images/" + files.upload.name));
+                            console.log('old path:', oldPath);
+                            console.log('new path:', newPath);
+                            // console.log('typeof:', typeof oldPath);
+        
+                            fs.rename(oldPath, newPath, (err) => {
+                                if (err) throw err;
+                                console.log('files was uploaded successfully');
+                            });
+        
+                        } else {
+                            tempObj.image = thisCat.image;      //copy over last image to new image
+                        }
+                    }
+                    resolve(tempObj);
+                })
+                    
+                
+                handleImage.then((obj) => {
+                    console.log('updated cat info:', obj);
+
+                    allCats[thisCatIndex]= obj; //overwrite last cat object with new edited cat object
+                    let json = JSON.stringify(allCats);
+                    fs.writeFile('./data/cats.json',json, (err) => {
+                        if (err) throw err;
+                        res.writeHead(302, {location: "/"});
+                        res.end();
+                    })
+                })
+                
+                
+            })
+        });
+
     } else if (pathname.includes('/cats-find-new-home') && req.method === 'GET') {
         console.log('get cats-find-new-home');
+        let filepath = path.normalize(
+            path.join(__dirname, "../views/catShelter.html")
+        );
 
-    } else if (pathname.includes('/cats-edit') && req.method === 'POST') {
-        console.log('post cats-edit');
+        const index = fs.createReadStream(filepath);
+
+        index.on('data', (data) => {
+            //console.log('req', req, '\nres', res);
+            
+            let newId = req.url.match(/[\A-Za-z0-9]+$/g)[0];    //get id from url
+            console.log('new id',newId);
+
+            let currentCat = search(cats, newId);
+            console.log(currentCat);
+
+
+            let modifiedData = data.toString().replace('{{imageLoc}}', './content/images/'+currentCat.image);
+            modifiedData = modifiedData.replace(/{{name}}/g, currentCat.name);
+            modifiedData = modifiedData.replace('{{description}}', currentCat.description);
+
+            modifiedData = modifiedData.replace(/{{breed}}/g, currentCat.breed);
+
+            res.write(modifiedData);
+        });
+
+        index.on('end', () => {
+            res.end();
+        });
+
+        index.on('error', (err) => {
+            console.log(err);
+        });
 
     } else if (pathname.includes('/cats-find-new-home') && req.method === 'POST') {
         console.log('post cats-find-new-home');
 
     } else {
         return true; //is request not handled
+    }
+}
+
+function search(arr, val) {
+    for (let i=0; i<arr.length; i++) {     //search cats arr and find the cat with the id
+        if (arr[i].id === val) {
+            return arr[i];
+        }
     }
 }
