@@ -61,6 +61,7 @@ module.exports = (req, res) => {
                 let json = JSON.stringify(allCats);
                 fs.writeFile('./data/cats.json',json, (err) => {
                     if (err) throw err;
+                    // res.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
                     res.writeHead(302, {location: "/"});
                     res.end();
                 })
@@ -111,14 +112,14 @@ module.exports = (req, res) => {
                 fs.writeFile('./data/breeds.json', json, 'utf-8', () => console.log('The breed was uploaded successfully'));
 
             });
-
+            // res.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
             res.writeHead(302, {
                 location: '/'
             });
             res.end();
         });
 
-    } else if (pathname.includes('/cats-edit') && req.method === 'GET') {
+    } else if (pathname.includes('/cats-edit/') && req.method === 'GET') {
         console.log('get cats-edit');
         let filepath = path.normalize(
             path.join(__dirname, "../views/editCat.html")
@@ -234,15 +235,15 @@ module.exports = (req, res) => {
                 let json = JSON.stringify(allCats);
                 fs.writeFile('./data/cats.json',json, (err) => {
                     if (err) throw err;
-                    //res.writeHead(302, {location: "/"});
-                    res.redirect(302, '/')
+                    // res.setHeader("Expires", "Sat, 6 May 1995 12:00:00 GMT");
+                    res.writeHead(302, {location: "/"});
                     res.end();
                 })
 
             })
         });
 
-    } else if (pathname.includes('/cats-find-new-home') && req.method === 'GET') {
+    } else if (pathname.includes('/cats-find-new-home/') && req.method === 'GET') {
         console.log('get cats-find-new-home');
         let filepath = path.normalize(
             path.join(__dirname, "../views/catShelter.html")
@@ -251,8 +252,8 @@ module.exports = (req, res) => {
         const index = fs.createReadStream(filepath);
 
         index.on('data', (data) => {
-            //console.log('req', req, '\nres', res);
-            
+            //console.log('~req', req, '\n~res', res);
+            console.log('~req-url:', req.url)
             let newId = req.url.match(/[\A-Za-z0-9]+$/g)[0];    //get id from url
             console.log('new id',newId);
 
