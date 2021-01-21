@@ -10,7 +10,7 @@ var logger = require('morgan');
 // var upload = multer();
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var searchRouter = require('./routes/search');
 var addBreedRouter = require('./routes/add-breed');
 var addCatRouter = require('./routes/add-cat');
 var editCatRouter = require('./routes/edit-cat');
@@ -29,7 +29,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/search', searchRouter);
 app.use('/cats/add-breed', addBreedRouter);
 app.use('/cats/add-cat', addCatRouter);
 app.use('/cats/edit-cat', editCatRouter);
