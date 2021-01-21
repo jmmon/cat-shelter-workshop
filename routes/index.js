@@ -7,6 +7,7 @@ const cats = require('../data/cats.json');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
+    console.log(cats);
     res.render('index', { cats: cats });
 });
 

@@ -230,8 +230,8 @@ module.exports = (req, res) => {
                 //write file with new data
 
                 console.log('updated cat info:', editedCat);
-
-                allCats[thisCatIndex]= editedCat; //overwrite last cat object with new edited cat object
+                console.log('indexOf', allCats.indexOf(thisCat));
+                allCats[allCats.indexOf(thisCat)]= editedCat; //overwrite last cat object with new edited cat object
                 let json = JSON.stringify(allCats);
                 fs.writeFile('./data/cats.json',json, (err) => {
                     if (err) throw err;

@@ -1,32 +1,32 @@
 var express = require('express');
 var router = express.Router();
 var fs = require('fs');
-//var qs = require('querystring');
 
 const formidable = require('formidable');
 const path = require('path');
+
 const breeds = require('../data/breeds.json');
-const cats = './data/cats.json';
+const cats = require('../data/cats.json');
+const catsPath = './data/cats.json';
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
     res.render('add-cat', { catBreeds: breeds });
 });
 
-router.post('/', function(req, res, next) {
+router.post('/', (req, res, next) => {
     //do something
 
     console.log('add-cat post path');
-    //console.log('cat input:', req.body);
-    //console.log('~req', req);
-    //console.log('~res', res);
-    console.log(req.body);
+    // console.log('~req.body', req.body);
+    // console.log('~res', res);
+    // console.log(req.body);
     let form = new formidable.IncomingForm();
 
     form.parse(req, (err, fields, files) => {
         if (err) throw err;
-        console.log('~fields:', fields);
-        console.log('~files:', files);
+        //console.log('~fields:', fields);
+        //console.log('~files:', files);
 
         let oldPath = files.upload.path;    //
         let newPath = path.normalize(path.join(__dirname, "../public/images/" + files.upload.name));
@@ -41,16 +41,15 @@ router.post('/', function(req, res, next) {
             console.log('files was uploaded successfully');
         });
 
-        fs.readFile(cats, 'utf-8', (err, data) => {
+        fs.readFile(catsPath, 'utf-8', (err, data) => {
             if (err) throw err;
-
-            let allCats = JSON.parse(data);
             
-            allCats.push({ id:newId, ...fields, image: files.upload.name });
-            let json = JSON.stringify(allCats);
-            fs.writeFile(cats, json, (err) => {
+            cats.push({ id:newId, ...fields, image: files.upload.name });
+            let json = JSON.stringify(cats);
+            
+            fs.writeFile(catsPath, json, (err) => {
                 if (err) throw err;
-                
+                console.log('Cat added!');
                 res.redirect('/');
             });
         });
