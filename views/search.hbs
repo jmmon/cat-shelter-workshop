@@ -27,6 +27,8 @@
 	
     <main>
         <section class="cats">
+            <h3 align="center">Your search returned {{resultsLength}} result{{#if plural}}s{{/if}}.</h3><br>
+            {{#if results}}
             <ul>
                 {{#each cats}}
                 <li>
@@ -41,6 +43,11 @@
                 </li>
                 {{/each}}
             </ul>
+            {{else}}
+            <p align="center">
+                No cats were found which included "{{searchText}}" in their name, description, or breed. Try again?
+            </p>
+            {{/if}}
         </section>
     </main>
 </body>
