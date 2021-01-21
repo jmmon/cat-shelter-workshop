@@ -29,7 +29,9 @@
             <input name="upload" type="file" id="image">
             <label for="group">Breed</label>
             <select name="breed" id="group">
-                {{catBreeds}}
+                {{#each catBreeds}}
+                  <option value="{{this}}">{{this}}</option>
+                {{/each}}
             </select>
             <button type="submit">Add Cat</button>
         </form>

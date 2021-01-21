@@ -2,7 +2,7 @@ const url = require('url');
 const fs = require('fs');
 const path = require('path');
 const cats = require('../data/cats.json');
-const breeds = require('../data/breeds.json');
+//const breeds = require('../data/breeds.json');
 
 module.exports = (req, res) => {
     const pathname = url.parse(req.url).pathname;
@@ -29,7 +29,7 @@ module.exports = (req, res) => {
                 'Content-Type': 'text/html'
             });
             let modifiedCats = cats.map((cat) => `<li>
-            <img src="${path.join('./content/images/' + cat.image)}" alt="${cat.name}">
+            <img src="${path.join('./public/images/' + cat.image)}" alt="${cat.name}">
             <h3>${cat.name}</h3>
             <p><span>Breed: </span>${cat.breed}</p>
             <p><span>Description: </span>${cat.description}</p>
