@@ -12,6 +12,10 @@ function getContentType(url) {
         return 'text/javascript';
     } else if(url.endsWith('ico')) {
         return 'image/ico';
+    } else if(url.endsWith('jpg')) {
+        return 'image/jpg';
+    } else if(url.endsWith('jpeg')) {
+        return 'image/jpeg';
     }
 }
 
@@ -24,27 +28,50 @@ module.exports = (req,res) => {
         //check for errors
         //deliver correct content type
         //send correct response with data received from the fs module
-
-        fs.readFile(`./${pathname}`, 'utf-8', (err,data) => {
-            if (err) {
-                console.log(err);
-                res.writeHead(404, {
-                    'Content-Type': 'text/plain'
-                });
-
-                res.write("Error was found");
+        if (pathname.endsWith('png') || pathname.endsWith('jpg') || pathname.endsWith('jpeg') || pathname.endsWith('ico')) {
+            fs.readFile(`./${pathname}`, (err, data) => {
+                if (err) {
+                    console.log(err);
+                    res.writeHead(404, {
+                        'Content-Type': 'text/plain'
+                    });
+    
+                    res.write("Error was found");
+                    res.end();
+                    return;
+                }
+                console.log(pathname);
+                res.writeHead(
+                    200,
+                    { 'Content-Type': getContentType(pathname) }
+                );
+    
+                res.write(data);
                 res.end();
-                return;
-            }
-            console.log(pathname);
-            res.writeHead(
-                200,
-                { 'Content-Type': getContentType(pathname) }
-            );
-
-            res.write(data);
-            res.end();
-        })
+            });
+        } else {
+            fs.readFile(`./${pathname}`, 'utf-8', (err, data) => {
+                if (err) {
+                    console.log(err);
+                    res.writeHead(404, {
+                        'Content-Type': 'text/plain'
+                    });
+    
+                    res.write("Error was found");
+                    res.end();
+                    return;
+                }
+                console.log(pathname);
+                res.writeHead(
+                    200,
+                    { 'Content-Type': getContentType(pathname) }
+                );
+    
+                res.write(data);
+                res.end();
+            });
+        }
+        
     } else {
         return true;
     }
