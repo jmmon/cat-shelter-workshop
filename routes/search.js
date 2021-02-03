@@ -19,7 +19,7 @@ router.get('/', function(req, res, next) {
         results = false;
     }
 
-    res.render('search', { cats: filteredCats, results: results, searchText:  searchText, resultsLength: filteredCats.length, plural: (filteredCats.length != 1) });
+    res.render('search', { title: 'Search Cats', cats: filteredCats, results: results, searchText:  searchText, resultsLength: filteredCats.length, plural: (filteredCats.length != 1) });
 });
 
 module.exports = router;

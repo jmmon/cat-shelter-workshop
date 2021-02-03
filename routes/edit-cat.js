@@ -33,7 +33,7 @@ router.get('/:uid', function(req, res, next) {
         });
     });
     
-    res.render('edit-cat', { thisCat: thisCat, catBreeds: breedsSelected });
+    res.render('edit-cat', { title: 'Edit Cat form', thisCat: thisCat, catBreeds: breedsSelected });
 });
 
 router.post('/:uid', function(req, res, next) {

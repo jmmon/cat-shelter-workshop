@@ -11,7 +11,7 @@ const catsPath = './data/cats.json';
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.render('add-cat', { catBreeds: breeds });
+    res.render('add-cat', { title: 'Add Cat form', catBreeds: breeds });
 });
 
 router.post('/', (req, res, next) => {

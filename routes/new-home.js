@@ -24,7 +24,7 @@ router.get('/:uid', function(req, res, next) {
     console.log('thisCat', thisCat);
 
     
-    res.render('new-home', { thisCat: thisCat });
+    res.render('new-home', { title: 'New Home', thisCat: thisCat });
 });
 
 router.post('/:uid', function(req, res, next) {
